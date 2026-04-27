@@ -16,10 +16,10 @@ The skeleton lives in your working folder. Copy or move it to a permanent place 
 
 ## 2. Replace the module path
 
-In `go.mod` and every `.go` file, replace `github.com/youruser/pulse` with your real module path (your GitHub username). One command:
+In `go.mod` and every `.go` file, replace `github.com/umar1593/pulse` with your real module path (your GitHub username). One command:
 
 ```bash
-grep -rl 'github.com/youruser/pulse' . | xargs sed -i '' 's#github.com/youruser/pulse#github.com/<YOURUSER>/pulse#g'
+grep -rl 'github.com/umar1593/pulse' . | xargs sed -i '' 's#github.com/umar1593/pulse#github.com/<YOURUSER>/pulse#g'
 ```
 
 (`sed -i ''` is for macOS; on Linux drop the empty quotes.)

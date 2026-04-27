@@ -10,7 +10,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/youruser/pulse/internal/config"
+	"github.com/umar1593/pulse/internal/config"
 )
 
 func NewPool(ctx context.Context, cfg config.DBConfig) (*pgxpool.Pool, error) {

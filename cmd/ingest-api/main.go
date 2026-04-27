@@ -18,9 +18,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/youruser/pulse/internal/config"
-	"github.com/youruser/pulse/internal/db"
-	"github.com/youruser/pulse/internal/events"
+	"github.com/umar1593/pulse/internal/config"
+	"github.com/umar1593/pulse/internal/db"
+	"github.com/umar1593/pulse/internal/events"
 )
 
 func main() {
