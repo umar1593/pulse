@@ -1,6 +1,16 @@
 .PHONY: help up down logs psql migrate-up migrate-down migrate-status run build test test-integration lint loadgen clean
 
-POSTGRES_DSN ?= postgres://pulse:pulse@localhost:5432/pulse?sslmode=disable
+ifneq (,$(wildcard .env))
+include .env
+export
+endif
+
+POSTGRES_USER ?= pulse
+POSTGRES_PASSWORD ?= pulse
+POSTGRES_DB ?= pulse
+POSTGRES_PORT ?= 5433
+
+POSTGRES_DSN ?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable
 
 help: ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
