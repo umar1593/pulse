@@ -1,0 +1,31 @@
+run:
+  timeout: 3m
+  tests: true
+
+linters:
+  enable:
+    - errcheck
+    - gocritic
+    - gofumpt
+    - goimports
+    - gosec
+    - govet
+    - ineffassign
+    - misspell
+    - revive
+    - staticcheck
+    - unused
+    - wastedassign
+
+linters-settings:
+  gosec:
+    excludes:
+      - G404  # weak rng — acceptable in tests/loadgen
+  revive:
+    rules:
+      - name: var-naming
+      - name: exported
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
