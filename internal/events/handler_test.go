@@ -45,6 +45,19 @@ func TestHandler_Ingest_Accepts202(t *testing.T) {
 	}
 }
 
+func TestHandler_Ingest_AcceptsDuplicateAsIdempotent(t *testing.T) {
+	h := NewHandler(&fakeIngester{err: ErrDuplicateEvent})
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodPost, "/events",
+		bytes.NewReader([]byte(`{"user_id":"u","event_type":"x"}`)))
+
+	h.Ingest(rr, req)
+
+	if rr.Code != http.StatusAccepted {
+		t.Fatalf("status: got %d want %d", rr.Code, http.StatusAccepted)
+	}
+}
+
 func TestHandler_Ingest_RejectsInvalid(t *testing.T) {
 	cases := []struct {
 		name string

@@ -3,9 +3,9 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Parent table, partitioned by created_at on day boundaries.
--- Daily partitions are created in 00002_partitions.sql and (in production)
--- maintained by a background worker that keeps a rolling 30-day window of
--- future partitions plus a default catch-all.
+-- Daily partitions are created in 00002_partitions.sql and later maintained
+-- by a background worker that keeps a rolling future window plus a default
+-- catch-all.
 CREATE TABLE events (
     id          uuid        NOT NULL DEFAULT gen_random_uuid(),
     user_id     text        NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE events (
 ) PARTITION BY RANGE (created_at);
 
 COMMENT ON TABLE events IS
-    'Behavioral events. Range-partitioned daily; retention via partition drop in week 5.';
+    'Behavioral events. Range-partitioned daily; retention via partition drop after the hot-data horizon is enforced.';
 
 -- Default catch-all so inserts outside the rolling window do not fail.
 -- In week 8 we'll alert on rows landing here.

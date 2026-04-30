@@ -6,12 +6,16 @@ package events
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+var ErrDuplicateEvent = errors.New("duplicate event")
 
 type Repository struct {
 	pool *pgxpool.Pool
@@ -51,6 +55,10 @@ func (r *Repository) Insert(ctx context.Context, e Event) error {
 	_, err := r.pool.Exec(ctx, insertSQL,
 		e.ID, e.UserID, e.EventType, e.Properties, e.CreatedAt)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fmt.Errorf("%w: %s", ErrDuplicateEvent, pgErr.ConstraintName)
+		}
 		return fmt.Errorf("insert event: %w", err)
 	}
 	return nil

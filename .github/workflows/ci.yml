@@ -36,6 +36,7 @@ jobs:
     env:
       POSTGRES_DSN: postgres://pulse:pulse@localhost:5432/pulse?sslmode=disable
       PULSE_DB_DSN: postgres://pulse:pulse@localhost:5432/pulse?sslmode=disable
+      PULSE_TEST_DSN: postgres://pulse:pulse@localhost:5432/pulse?sslmode=disable
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5

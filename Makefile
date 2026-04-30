@@ -1,4 +1,4 @@
-.PHONY: help up down logs psql migrate-up migrate-down migrate-status run build test test-integration lint loadgen clean
+.PHONY: help up down logs psql migrate-up migrate-down migrate-status run run-partition-worker build test test-integration lint loadgen clean
 
 ifneq (,$(wildcard .env))
 include .env
@@ -11,6 +11,7 @@ POSTGRES_DB ?= pulse
 POSTGRES_PORT ?= 5433
 
 POSTGRES_DSN ?= postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable
+PULSE_TEST_DSN ?= $(POSTGRES_DSN)
 
 help: ## show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
@@ -39,6 +40,9 @@ migrate-status: ## show migration state
 run: ## run ingest-api locally
 	go run ./cmd/ingest-api
 
+run-partition-worker: ## run partition maintenance worker locally
+	go run ./cmd/partition-worker
+
 build: ## build all binaries
 	mkdir -p bin && go build -o bin/ ./cmd/...
 
@@ -46,7 +50,7 @@ test: ## unit tests
 	go test -race -count=1 ./...
 
 test-integration: ## integration tests (requires docker)
-	go test -race -count=1 -tags=integration ./...
+	PULSE_TEST_DSN="$(PULSE_TEST_DSN)" go test -race -count=1 -tags=integration ./...
 
 lint: ## golangci-lint
 	golangci-lint run ./...

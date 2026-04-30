@@ -41,7 +41,6 @@ func run(parent context.Context) error {
 		return err
 	}
 
-	// SIGINT/SIGTERM cancels ctx, which we propagate everywhere.
 	ctx, cancel := signal.NotifyContext(parent, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 

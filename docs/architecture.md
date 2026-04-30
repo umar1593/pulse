@@ -60,3 +60,32 @@ The format is a stripped-down [ADR](https://adr.github.io/): **Context** (why we
 - *sqlc on top of pgx.* Considered for type-safe query generation; deferred to week 5 when query count grows.
 
 **Consequences.** We are mildly coupled to pgx types in the repository layer. Acceptable for a database-centric project.
+
+---
+
+## ADR-005 — Partition worker as its own process
+
+**Context.** Daily partitions must keep rolling forward even if ingest traffic is low, and the maintenance path issues DDL that has very different failure modes from the hot write API. We want the ingest path to stay small, predictable, and easy to scale independently from operational jobs.
+
+**Decision.** Run partition maintenance as a separate `partition-worker` process on an hourly ticker. This slightly increases operational surface area, but it gives us a smaller blast radius, clearer logs, and the option to supervise or restart the worker independently if a maintenance bug appears.
+
+**Alternatives.**
+
+- *Run it inside `ingest-api`.* Fewer moving pieces, but every API replica would need leader election or coordination to avoid duplicated work, and a bad maintenance loop would share fate with the write path.
+
+**Consequences.** In a tiny deployment we could still fold this back into `ingest-api` if process count mattered more than isolation. What would change our mind: if the operational cost of another service outweighed the risk reduction, or if we later adopt an external scheduler that can own DDL jobs centrally.
+
+---
+
+## ADR-006 — Keep a 90-day hot retention horizon
+
+**Context.** Partitioning only pays off operationally if we decide how long hot event data stays in the primary store. Without a declared horizon, partition drops are guesswork and disk growth becomes open-ended.
+
+**Decision.** Treat 90 days as the hot-data retention horizon for `events`. The worker already has drop support, but we keep destructive drops disabled until the week 5 pipeline is in place; for now this is the documented policy the system is being built toward.
+
+**Alternatives.**
+
+- *30 days.* Cheaper on disk, but too short for the kind of recruiter demos and ad hoc performance investigations this project is meant to support.
+- *Infinite retention on the primary.* Simplest short term, but it defeats the point of practicing partition lifecycle management.
+
+**Consequences.** Daily partitioning keeps this manageable at roughly 90 active partitions for hot data. When the retention path is turned on, dropping old partitions becomes a fast metadata operation instead of a row-by-row delete.

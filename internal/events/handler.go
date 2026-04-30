@@ -55,6 +55,10 @@ func (h *Handler) Ingest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.repo.Insert(r.Context(), ev); err != nil {
+		if errors.Is(err, ErrDuplicateEvent) {
+			w.WriteHeader(http.StatusAccepted)
+			return
+		}
 		slog.Error("insert failed", "err", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
